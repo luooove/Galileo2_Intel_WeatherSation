@@ -2,7 +2,9 @@
 // Written by ladyada, public domain
 #include <dht.h>
 
-
+/*********PIN Definition**************/
+#define DHTIN 2 // what pin we're connected to
+#define DHTOUT 4
 
 // Uncomment whatever type you're using!
 #define DHTTYPE DHT11 // DHT 11 
@@ -38,13 +40,11 @@ float           CO2Curve[3]  =  {2.602,ZERO_POINT_VOLTAGE,(REACTION_VOLTGAE/(2.6
                                                      //slope = ( reaction voltage ) / (log400 –log1000) 
 
 
-/*********PIN Definition**************/
-#define DHTIN 2 // what pin we're connected to
-#define DHTOUT 4
+
 
 int UV_PIN_Analog = A0;
-int PM25_PIN_Analog = A0;
-int PM25_PIN_Digital = 13;
+int dustPin = A0;
+int ledPower = 13;
 
 #define         MG_PIN                       (0)     //define which analog input channel you are going to use
 #define         BOOL_PIN                     (2)
@@ -61,7 +61,7 @@ float PM25_Update = 0;
 float UV_Update = 0;
 float CO2_Update = 0;
 
-
+int dustVal = 0;
 int delayTime=280;
 int delayTime2=40;
 float offTime=9680;
