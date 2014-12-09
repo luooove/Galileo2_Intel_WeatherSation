@@ -174,9 +174,9 @@ void Sensor_PM25()
     digitalWrite(ledPower,HIGH); 
     delayMicroseconds(offTime);
    // delay(100);
-    Serial.print("PM2.5:  ");
-    Serial.println(dustVal);
-    Serial.println((float(dustVal/1024)-0.0356)*120000*0.035,2);
+   // Serial.print("PM2.5:  ");
+    //Serial.println(dustVal);
+   // Serial.println((float(dustVal/1024)-0.0356)*120000*0.035,2);
     PM25_Update = (float(dustVal/1024)-0.0356)*120000*0.035;
 }
 
