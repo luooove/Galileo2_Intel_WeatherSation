@@ -1,13 +1,14 @@
 // Example testing sketch for various DHT humidity/temperature sensors
 // Written by ladyada, public domain
-#include <dht.h>
-
+#include <dht11.h>
+#define DHT11PIN 2
+dht11 DHT11;
 /*********PIN Definition**************/
-#define DHTIN 2 // what pin we're connected to
-#define DHTOUT 4
+//#define DHTIN 2 // what pin we're connected to
+//#define DHTOUT 4
 
 // Uncomment whatever type you're using!
-#define DHTTYPE DHT11 // DHT 11 
+//#define DHTTYPE DHT11 // DHT 11 
 //#define DHTTYPE DHT22 // DHT 22 (AM2302)
 //#define DHTTYPE DHT21 // DHT 21 (AM2301)
 
@@ -16,10 +17,10 @@
 // Connect pin 4 (on the right) of the sensor to GROUND
 // Connect a 10K resistor from pin 2 (data) to pin 1 (power) of the sensor
 
-DHT dht(DHTIN,DHTOUT, DHTTYPE);
-
-
-
+//DHT dht(DHTIN,DHTOUT, DHTTYPE);
+//
+//
+//
 /***********************Software Related Macros************************************/
 #define         READ_SAMPLE_INTERVAL         (50)    //define how many samples you are going to take in normal operation
 #define         READ_SAMPLE_TIMES            (5)     //define the time interval(in milisecond) between each samples in 
@@ -31,7 +32,7 @@ DHT dht(DHTIN,DHTOUT, DHTTYPE);
 #define         REACTION_VOLTGAE             (0.020) //define the voltage drop of the sensor when move the sensor from air into 1000ppm CO2
 
 
-/*****************************Globals***********************************************/
+///*****************************Globals***********************************************/
 float           CO2Curve[3]  =  {2.602,ZERO_POINT_VOLTAGE,(REACTION_VOLTGAE/(2.602-3))};   
                                                      //two points are taken from the curve. 
                                                      //with these two points, a line is formed which is
@@ -42,12 +43,12 @@ float           CO2Curve[3]  =  {2.602,ZERO_POINT_VOLTAGE,(REACTION_VOLTGAE/(2.6
 
 
 
-int UV_PIN_Analog = A0;
-int dustPin = A0;
+int UV_PIN_Analog = A1;
+int dustPin = A3;
 int ledPower = 13;
 
 #define         MG_PIN                       (0)     //define which analog input channel you are going to use
-#define         BOOL_PIN                     (2)
+#define         BOOL_PIN                     (4)
 #define         DC_GAIN                      (8.5)   //define the DC gain of amplifier
 
 
@@ -61,7 +62,7 @@ float PM25_Update = 0;
 float UV_Update = 0;
 float CO2_Update = 0;
 
-int dustVal = 0;
+float dustVal = 0;
 int delayTime=280;
 int delayTime2=40;
 float offTime=9680;
@@ -70,12 +71,14 @@ float offTime=9680;
 
 void setup() {
    Serial.begin(9600);
-   Serial1.begin(9600);
+   Serial1.begin(38400);
+   pinMode(UV_PIN_Analog, INPUT);                        //set pin to input
    pinMode(BOOL_PIN, INPUT);                        //set pin to input
    digitalWrite(BOOL_PIN, HIGH);                    //turn on pullup resistors
-  
+   pinMode(ledPower,OUTPUT);
+   pinMode(dustPin, INPUT);
    Serial.println("DHTxx test!");
-   dht.begin();
+  // dht.begin();
 }
 
 void loop() {
@@ -89,45 +92,75 @@ void loop() {
 
 void Update()
 {
+    Serial.print("Temperature_Update:");Serial.println(Temperature_Update);
+    Serial.print("Temperature_Update:");Serial.println(Humidity_Update);
+    Serial.print("UV_Update:");Serial.println(UV_Update);
+    Serial.print("PM25_Update:");Serial.println(PM25_Update);
+    Serial.print("CO2_Update:");Serial.println(CO2_Update);
+    
     Serial1.print(Temperature_Update);Serial1.print("|");
     Serial1.print(Humidity_Update);Serial1.print("|");
-    Serial1.print(PM25_Update);Serial1.print("|");
     Serial1.print(UV_Update);Serial1.print("|");
-    Serial1.println(CO2_Update);Serial1.print("|");
+    Serial1.print(PM25_Update);Serial1.print("|");
+    Serial1.println(CO2_Update);
 }
 
 void Sensor_All()
 {
-   Sensor_TemperatureHumidity();
+   Sensor_TemperatureHumidity_Arduino();
    Sensor_PM25();
    Sensor_UV();
    Sensor_CO2();
   
 }
 
-void Sensor_TemperatureHumidity()
+//void Sensor_TemperatureHumidity()
+//{
+//    // Reading temperature or humidity takes about 250 milliseconds!
+//    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+//    float h = dht.readHumidity();
+//    Serial.println(h);
+//    
+//    // Read temperature as Celsius
+//    float t = dht.readTemperature();
+//    Serial.println(t);
+//    
+//    // Read temperature as Fahrenheit
+//    float f = dht.readTemperature(true);
+//     
+//    // Check if any reads failed and exit early (to try again).
+//    if (isnan(h) || isnan(t) || isnan(f)) {
+//    Serial.println("Failed to read from DHT sensor!");
+//    return;
+//    }
+//    
+//    // Compute heat index
+//    // Must send in temp in Fahrenheit!
+//    float hi = dht.computeHeatIndex(f, h);
+//}
+
+void Sensor_TemperatureHumidity_Arduino()
 {
-    // Reading temperature or humidity takes about 250 milliseconds!
-    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-    float h = dht.readHumidity();
-    Serial.println(h);
-    
-    // Read temperature as Celsius
-    float t = dht.readTemperature();
-    Serial.println(t);
-    
-    // Read temperature as Fahrenheit
-    float f = dht.readTemperature(true);
-     
-    // Check if any reads failed and exit early (to try again).
-    if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println("Failed to read from DHT sensor!");
-    return;
-    }
-    
-    // Compute heat index
-    // Must send in temp in Fahrenheit!
-    float hi = dht.computeHeatIndex(f, h);
+    int chk = DHT11.read(DHT11PIN);
+
+  Serial.print("Read sensor: ");
+  switch (chk)
+  {
+    case DHTLIB_OK: 
+                Serial.println("OK"); 
+                break;
+    case DHTLIB_ERROR_CHECKSUM: 
+                Serial.println("Checksum error"); 
+                break;
+    case DHTLIB_ERROR_TIMEOUT: 
+                Serial.println("Time out error"); 
+                break;
+    default: 
+                Serial.println("Unknown error"); 
+                break;
+  }
+  Temperature_Update = DHT11.temperature;
+  Humidity_Update =  DHT11.humidity;
 }
 
 void Sensor_PM25()
@@ -135,14 +168,15 @@ void Sensor_PM25()
     // ledPower is any digital pin on the arduino connected to Pin 3 on the sensor
     digitalWrite(ledPower,LOW); 
     delayMicroseconds(delayTime);
+    
     dustVal=analogRead(dustPin); 
     delayMicroseconds(delayTime2);
     digitalWrite(ledPower,HIGH); 
     delayMicroseconds(offTime);
    // delay(100);
-   // Serial.print("PM2.5:  ");
-    //Serial.println(dustVal,2);
-   // Serial.println((float(dustVal/1024)-0.0356)*120000*0.035,2);
+    Serial.print("PM2.5:  ");
+    Serial.println(dustVal);
+    Serial.println((float(dustVal/1024)-0.0356)*120000*0.035,2);
     PM25_Update = (float(dustVal/1024)-0.0356)*120000*0.035;
 }
 
@@ -150,6 +184,7 @@ void Sensor_UV()
 {
   int i = 0;
   i=analogRead(UV_PIN_Analog);
+  Serial.print("UV_");Serial.println(i);
   if(i<46)UV_Update=0;
   else if(i>=46&&i<65)UV_Update=1;
   else if(i>=65&&i<83)UV_Update=2;
@@ -169,7 +204,7 @@ void Sensor_CO2()  //not tested
 {
     int percentage;
     float volts;
-    
+   
    
     volts = MGRead(MG_PIN);
     Serial.print( "SEN0159:" );
@@ -180,7 +215,7 @@ void Sensor_CO2()  //not tested
     Serial.print("CO2:");
     if (percentage == -1) {
         Serial.print( "<400" );
-    } else {
+   } else {
         Serial.print(percentage);
     }
     Serial.print( "ppm" );  
@@ -199,12 +234,12 @@ void Sensor_CO2()  //not tested
     delay(200);
 }
 
-
-/*****************************  MGRead *********************************************
-Input:   mg_pin - analog channel
-Output:  output of SEN0159
-Remarks: This function reads the output of SEN0159
-************************************************************************************/ 
+//
+///*****************************  MGRead *********************************************
+//Input:   mg_pin - analog channel
+//Output:  output of SEN0159
+//Remarks: This function reads the output of SEN0159
+//************************************************************************************/ 
 float MGRead(int mg_pin)
 {
     int i;
@@ -220,14 +255,14 @@ float MGRead(int mg_pin)
 }
 
 /*****************************  MQGetPercentage **********************************
-Input:   volts   - SEN-000007 output measured in volts
-         pcurve  - pointer to the curve of the target gas
-Output:  ppm of the target gas
-Remarks: By using the slope and a point of the line. The x(logarithmic value of ppm) 
-         of the line could be derived if y(MG-811 output) is provided. As it is a 
-         logarithmic coordinate, power of 10 is used to convert the result to non-logarithmic 
-         value.
-************************************************************************************/ 
+//Input:   volts   - SEN-000007 output measured in volts
+//         pcurve  - pointer to the curve of the target gas
+//Output:  ppm of the target gas
+//Remarks: By using the slope and a point of the line. The x(logarithmic value of ppm) 
+//         of the line could be derived if y(MG-811 output) is provided. As it is a 
+//         logarithmic coordinate, power of 10 is used to convert the result to non-logarithmic 
+//         value.
+/************************************************************************************/ 
 int  MGGetPercentage(float volts, float *pcurve)
 {
    if ((volts/DC_GAIN )>=ZERO_POINT_VOLTAGE) {
