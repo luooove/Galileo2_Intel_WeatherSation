@@ -1,14 +1,14 @@
 // Example testing sketch for various DHT humidity/temperature sensors
 // Written by ladyada, public domain
-#include <dht11.h>
-#define DHT11PIN 2
-dht11 DHT11;
+#include <dht.h>
+//#define DHT11PIN 2
+//dht11 DHT11;
 /*********PIN Definition**************/
-//#define DHTIN 2 // what pin we're connected to
-//#define DHTOUT 4
+#define DHTIN 2 // what pin we're connected to
+#define DHTOUT 3
 
 // Uncomment whatever type you're using!
-//#define DHTTYPE DHT11 // DHT 11 
+#define DHTTYPE DHT11 // DHT 11 
 //#define DHTTYPE DHT22 // DHT 22 (AM2302)
 //#define DHTTYPE DHT21 // DHT 21 (AM2301)
 
@@ -17,7 +17,7 @@ dht11 DHT11;
 // Connect pin 4 (on the right) of the sensor to GROUND
 // Connect a 10K resistor from pin 2 (data) to pin 1 (power) of the sensor
 
-//DHT dht(DHTIN,DHTOUT, DHTTYPE);
+DHT dht(DHTIN,DHTOUT, DHTTYPE);
 //
 //
 //
@@ -78,7 +78,7 @@ void setup() {
    pinMode(ledPower,OUTPUT);
    pinMode(dustPin, INPUT);
    Serial.println("DHTxx test!");
-  // dht.begin();
+   dht.begin();
 }
 
 void loop() {
@@ -107,61 +107,63 @@ void Update()
 
 void Sensor_All()
 {
-   Sensor_TemperatureHumidity_Arduino();
+   Sensor_TemperatureHumidity();
    Sensor_PM25();
    Sensor_UV();
    Sensor_CO2();
   
 }
 
-//void Sensor_TemperatureHumidity()
-//{
-//    // Reading temperature or humidity takes about 250 milliseconds!
-//    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-//    float h = dht.readHumidity();
-//    Serial.println(h);
-//    
-//    // Read temperature as Celsius
-//    float t = dht.readTemperature();
-//    Serial.println(t);
-//    
-//    // Read temperature as Fahrenheit
-//    float f = dht.readTemperature(true);
-//     
-//    // Check if any reads failed and exit early (to try again).
-//    if (isnan(h) || isnan(t) || isnan(f)) {
-//    Serial.println("Failed to read from DHT sensor!");
-//    return;
-//    }
-//    
-//    // Compute heat index
-//    // Must send in temp in Fahrenheit!
-//    float hi = dht.computeHeatIndex(f, h);
-//}
-
-void Sensor_TemperatureHumidity_Arduino()
+void Sensor_TemperatureHumidity()
 {
-    int chk = DHT11.read(DHT11PIN);
-
-  Serial.print("Read sensor: ");
-  switch (chk)
-  {
-    case DHTLIB_OK: 
-                Serial.println("OK"); 
-                break;
-    case DHTLIB_ERROR_CHECKSUM: 
-                Serial.println("Checksum error"); 
-                break;
-    case DHTLIB_ERROR_TIMEOUT: 
-                Serial.println("Time out error"); 
-                break;
-    default: 
-                Serial.println("Unknown error"); 
-                break;
-  }
-  Temperature_Update = DHT11.temperature;
-  Humidity_Update =  DHT11.humidity;
+    // Reading temperature or humidity takes about 250 milliseconds!
+    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+    float h = dht.readHumidity();
+    Humidity_Update = h;
+   // Serial.println(h);
+    
+    // Read temperature as Celsius
+    float t = dht.readTemperature();
+    Temperature_Update = t;
+   // Serial.println(t);
+    
+    // Read temperature as Fahrenheit
+    float f = dht.readTemperature(true);
+     
+    // Check if any reads failed and exit early (to try again).
+    if (isnan(h) || isnan(t) || isnan(f)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+    }
+    
+    // Compute heat index
+    // Must send in temp in Fahrenheit!
+    float hi = dht.computeHeatIndex(f, h);
 }
+
+//void Sensor_TemperatureHumidity_Arduino()
+//{
+//    int chk = DHT11.read(DHT11PIN);
+//
+//  Serial.print("Read sensor: ");
+//  switch (chk)
+//  {
+//    case DHTLIB_OK: 
+//                Serial.println("OK"); 
+//                break;
+//    case DHTLIB_ERROR_CHECKSUM: 
+//                Serial.println("Checksum error"); 
+//                break;
+//    case DHTLIB_ERROR_TIMEOUT: 
+//                Serial.println("Time out error"); 
+//                break;
+//    default: 
+//                Serial.println("Unknown error"); 
+//                break;
+//  }
+//  Temperature_Update = DHT11.temperature;
+//  Humidity_Update =  DHT11.humidity;
+//}
 
 void Sensor_PM25()
 {
