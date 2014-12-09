@@ -56,6 +56,7 @@ int ledPower = 13;
 
 
 /*********Variables Updata**************/
+
 float Humidity_Update = 0;      
 float Temperature_Update = 0;  
 float PM25_Update = 0;
@@ -75,7 +76,7 @@ void setup() {
    pinMode(UV_PIN_Analog, INPUT);                        //set pin to input
    pinMode(BOOL_PIN, INPUT);                        //set pin to input
    digitalWrite(BOOL_PIN, HIGH);                    //turn on pullup resistors
-   pinMode(ledPower,OUTPUT);
+   pinMode(ledPower,OUTPUT_FAST);
    pinMode(dustPin, INPUT);
    Serial.println("DHTxx test!");
    dht.begin();
@@ -92,11 +93,11 @@ void loop() {
 
 void Update()
 {
-    Serial.print("Temperature_Update:");Serial.println(Temperature_Update);
-    Serial.print("Temperature_Update:");Serial.println(Humidity_Update);
-    Serial.print("UV_Update:");Serial.println(UV_Update);
-    Serial.print("PM25_Update:");Serial.println(PM25_Update);
-    Serial.print("CO2_Update:");Serial.println(CO2_Update);
+    Serial.print("Temperature:");Serial.println(Temperature_Update);
+    Serial.print("Humidity:");Serial.println(Humidity_Update);
+    Serial.print("UV:");Serial.println(UV_Update);
+    Serial.print("PM25:");Serial.println(PM25_Update);
+    Serial.print("CO2:");Serial.println(CO2_Update);
     
     Serial1.print(Temperature_Update);Serial1.print("|");
     Serial1.print(Humidity_Update);Serial1.print("|");
